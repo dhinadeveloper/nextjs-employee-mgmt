@@ -1,5 +1,5 @@
 import locData from "../data/locData";
-import fetch, { Headers } from "node-fetch";
+
 export const setLocSt = async () => {
     console.log("hi from helper")
     if (
