@@ -27,8 +27,20 @@ import useStore from "../store/store";
 import locData from "../data/locData";
 import Home from "..";
 import useLocStore from "../store/locStore";
+import EmployeeTab from "../common/employee-tab";
+import * as Helper from "../helper/helper";
+import Image from "next/image";
 
-
+function createData(id, name, calories, fat, carbs, protein) {
+  return {
+    id,
+    name,
+    calories,
+    fat,
+    carbs,
+    protein,
+  };
+}
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -51,28 +63,16 @@ function getComparator(order, orderBy) {
 // only support modern browsers you can replace stableSort(exampleArray, exampleComparator)
 // with exampleArray.slice().sort(exampleComparator)
 function stableSort(array, comparator) {
-  if (array) {
-    const stabilizedThis = array.map((el, index) => [el, index]);
-    stabilizedThis.sort((a, b) => {
-      const order = comparator(a[0], b[0]);
-      if (order !== 0) {
-        return order;
-      }
-      return a[1] - b[1];
-    });
-    return stabilizedThis.map((el) => el[0]);
-  }
-  return [
-    {
-      id: 1,
-      employee_name: "Tiger Nixon",
-      employee_salary: 320800,
-      employee_age: 61,
-      profile_image: "",
-    },
-  ];
+  const stabilizedThis = array.map((el, index) => [el, index]);
+  stabilizedThis.sort((a, b) => {
+    const order = comparator(a[0], b[0]);
+    if (order !== 0) {
+      return order;
+    }
+    return a[1] - b[1];
+  });
+  return stabilizedThis.map((el) => el[0]);
 }
-
 const headCells = [
   {
     id: "id",
@@ -175,9 +175,6 @@ function EnhancedTableToolbar(props) {
     var data = JSON.parse(localStorage.getItem("empData") || "[]");
     var rowtemp = data.data;
     numSelected.forEach((item, index) => {
-      // console.log([4].includes(4) )
-      // console.log(item,rowtemp)
-
       rowtemp = rowtemp.filter((obj) => obj.id !== item);
     });
 
@@ -189,13 +186,8 @@ function EnhancedTableToolbar(props) {
   const editEmp = useStore((state) => state.addEmp);
   const editData = () => {
     editEmp(numSelected);
-    // localStorage.setItem('url','/#edit')
-    router.refresh();
+    router.push("/employee/employee-edit");
   };
-  // const editData = (event) => {
-  //   addEmp(numSelected[0]);
-  //   console.log(emp);
-  // };
   return (
     <Toolbar
       sx={{
@@ -210,18 +202,18 @@ function EnhancedTableToolbar(props) {
         }),
       }}
     >
-      {numSelected.lenth > 0 ? (
+      {numSelected > 0 ? (
         <Typography
           sx={{ flex: "1 1 100%" }}
           color="inherit"
           variant="subtitle1"
           component="div"
         >
-          {numSelected.length} selected
+          {numSelected} selected
         </Typography>
       ) : (
         <Typography
-          sx={{ flex: "1 1 100%" }}
+          sx={{ flex: "1 1 auto" }}
           variant="h6"
           id="tableTitle"
           component="div"
@@ -229,6 +221,7 @@ function EnhancedTableToolbar(props) {
           Employee List
         </Typography>
       )}
+
       {numSelected.length == 1 ? (
         <Tooltip title="Edit">
           <IconButton onClick={editData}>
@@ -258,66 +251,25 @@ function EnhancedTableToolbar(props) {
 EnhancedTableToolbar.propTypes = {
   numSelected: PropTypes.array.isRequired,
 };
-var rows=[
-  {
-    id: 1,
-    employee_name: "Tiger Nixon",
-    employee_salary: 320800,
-    employee_age: 61,
-    profile_image: "",
-  },
-]
-export default function EmployeeList() {
-  const getLocEmp = useLocStore((state)=>state.empData)
-  const editLocEmp = useLocStore((state) => state.addEmp);
-   
-  React.useEffect(() => {
-    console.log()
-  rows=getLocEmp
-   console.log(rows)
-  }, []);
-  // const [data, setData] = React.useState(null);
-  // const [rows, setRows] = React.useState([{
-  //   id: 1,
-  //   employee_name: "Tiger Nixon",
-  //   employee_salary: 320800,
-  //   employee_age: 61,
-  //   profile_image: "",
-  // }]);
 
-  // const fetchData = async () => {
-  //   // Fetch your data from an API or any other source
-  //   if (typeof window !== "undefined") {
-  //     const data = JSON.parse(localStorage.getItem("empData")) ?? [];
-  //     setRows(data.data)
-  //     // rows=data.data
-  //      console.log("out ofeff",rows)
-  //   }
-  //   // Update the state with the new data
-
-  // };
-
-  // React.useEffect(() => {
-  //   // Fetch data when the component mounts
-  //   fetchData();
-  // }, []); // The empty dependency array ensures the effect runs only once on mount
-
-  // React.useEffect(() => {
-  //   if (typeof window !== "undefined") {
-  //     const data = JSON.parse(localStorage.getItem("empData")) ?? [];
-  //     rows = data.data
-  //     // rows=data.data
-  //      console.log("out ofeff",rows)
-  //   }
-  // }, [rows]);
-
-  // rows=data.data
+export default function EnhancedTable() {
   const [order, setOrder] = React.useState("asc");
   const [orderBy, setOrderBy] = React.useState("calories");
   const [selected, setSelected] = React.useState([]);
   const [page, setPage] = React.useState(0);
   const [dense, setDense] = React.useState(false);
   const [rowsPerPage, setRowsPerPage] = React.useState(25);
+  const [rows, setRows] = React.useState([]);
+  React.useEffect(() => {
+    Helper.setLocSt();
+    setTimeout(() => {
+      setRows(JSON.parse(localStorage?.getItem("empData")).data);
+      setPage(1);
+      setTimeout(() => {
+        setPage(0);
+      }, 200);
+    }, 1500);
+  }, []);
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === "asc";
@@ -383,7 +335,7 @@ export default function EmployeeList() {
 
   return (
     <>
-      <Home />
+      <EmployeeTab />{" "}
       <Box sx={{ width: "100%" }}>
         <Paper sx={{ width: "100%", mb: 2 }}>
           <EnhancedTableToolbar numSelected={selected} />
@@ -435,9 +387,18 @@ export default function EmployeeList() {
                         {row.id}
                       </TableCell>
                       <TableCell align="right">{row.employee_name}</TableCell>
-                      <TableCell align="right">{row.employee_salary}</TableCell>
                       <TableCell align="right">{row.employee_age}</TableCell>
-                      <TableCell align="right">{row.profile_image}</TableCell>
+                      <TableCell align="right">{row.employee_salary}</TableCell>
+                      <TableCell align="right">
+                        {row.profile_image && (
+                          <Image
+                            src={row.profile_image}
+                            width={150}
+                            height={150}
+                            alt="Uploaded Image"
+                          />
+                        )}
+                      </TableCell>
                     </TableRow>
                   );
                 })}
