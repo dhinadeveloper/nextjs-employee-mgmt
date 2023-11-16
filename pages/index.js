@@ -9,6 +9,7 @@ import useLocStore from "./store/locStore";
 import EmployeeList from "./employee/employee-list";
 import * as Helper from "./helper/helper"
 import { useRouter } from "next/navigation";
+import fetch, { Headers } from "node-fetch";
 export default function Index(){
   const router = useRouter()
 
