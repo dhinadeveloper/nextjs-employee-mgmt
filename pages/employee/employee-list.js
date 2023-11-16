@@ -268,7 +268,7 @@ export default function EnhancedTable() {
       setTimeout(() => {
         setPage(0);
       }, 200);
-    }, 1500);
+    }, 1800);
   }, []);
 
   const handleRequestSort = (event, property) => {
