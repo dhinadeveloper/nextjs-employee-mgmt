@@ -34,9 +34,9 @@ jobs:
       - name: Detect package manager
         id: detect-package-manager
         run: |
-          if [ -f "${{ github.workspace }}/nxt-app/package.json" ]; then
+          if [ -f "/home/runner/work/nextjs-employee-mgmt//nxt-app/package.json" ]; then
             echo $pwd
-            echo $ls
+            echo "$ls /home/runner/work/nextjs-employee-mgmt"
             echo "manager=npm" >> $GITHUB_OUTPUT
             echo "command=ci" >> $GITHUB_OUTPUT
             echo "runner=npx --no-install" >> $GITHUB_OUTPUT
